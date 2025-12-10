@@ -1,29 +1,19 @@
 ---
-- name: Provision system with required software
+- name: Provision for 01Rouen laptops
   hosts: localhost
-  become: yes
-  vars:
-    golang_version: "1.23.4"  # Update this to the latest version as needed
-    vscode_extensions:
-      - golang.go
-      - ms-python.python
-      - dbaeumer.vscode-eslint
-    # SECURITY NOTE: For production, use Ansible Vault or --extra-vars to pass credentials
-    # Example: ansible-playbook provision.yml --extra-vars "wifi_password=YourSecurePassword"
-    wifi_ssid: "CampusStMarc"
-    wifi_password: "Thunderbolt"
-    student_user: "student"
+  become: true
+  vars_files:
+    - ./01Prov.yml
 
   tasks:
     - name: Update apt cache
-      apt:
-        update_cache: yes
+      ansible.builtin.apt:
+        update_cache: true
         cache_valid_time: 3600
       when: ansible_os_family == "Debian"
 
-    # Install prerequisites
-    - name: Install required packages
-      apt:
+    - name: Install packages
+      ansible.builtin.apt:
         name:
           - wget
           - curl
@@ -34,79 +24,78 @@
           - ca-certificates
           - gnupg
         state: present
-      when: ansible_os_family == "Debian"
+      when: ansible_os_family = "Debian"
 
-    # Install latest Golang from official website
-    - name: Check if Golang is already installed
-      stat:
+    - name: Check if golang is installed
+      ansible.builtin.stat:
         path: /usr/local/go/bin/go
       register: golang_installed
 
-    - name: Get latest Golang version
-      uri:
+    - name: Get latest golang version
+      ansible.builtin.uri:
         url: https://go.dev/VERSION?m=text
-        return_content: yes
-        validate_certs: yes
-      register: golang_version_response
+        return_content: true
+        validate_certs: true
+      register: golang_version_resp
       changed_when: false
       when: not golang_installed.stat.exists
 
-    - name: Set latest Golang version
-      set_fact:
-        golang_latest_version: "{{ golang_version_response.content.split('\n')[0] }}"
+    - name: Set latets golang version
+      ansible.builtin.set_fact:
+        golang_latest_version: "{{ golang_version_resp.content.split('\n')[0] }}"
       when: not golang_installed.stat.exists
 
-    - name: Download latest Golang
-      get_url:
+    - name: Download latest golang version
+      ansible.builtin.get_url:
         url: "https://go.dev/dl/{{ golang_latest_version }}.linux-amd64.tar.gz"
         dest: "/tmp/{{ golang_latest_version }}.linux-amd64.tar.gz"
-        mode: '0644'
+        mode: "0644"
       when: not golang_installed.stat.exists
 
-    - name: Remove old Golang installation
-      file:
+    - name: Remove old golang installation
+      ansible.builtin.file:
         path: /usr/local/go
         state: absent
       when: not golang_installed.stat.exists
 
-    - name: Extract Golang archive
-      unarchive:
+    - name: Extract golang archive
+      ansible.builtin.unarchive:
         src: "/tmp/{{ golang_latest_version }}.linux-amd64.tar.gz"
         dest: /usr/local
-        remote_src: yes
+        remote_src: true
       when: not golang_installed.stat.exists
 
-    - name: Add Golang to PATH in /etc/profile.d
-      copy:
+    - name: Add golang to path in /etc/profile.d
+      ansible.builtin.copy:
         content: |
           export PATH=$PATH:/usr/local/go/bin
           export GOPATH=$HOME/go
           export PATH=$PATH:$GOPATH/bin
         dest: /etc/profile.d/golang.sh
-        mode: '0644'
+        mode: 0644
 
-    - name: Add Golang to PATH for student user
-      lineinfile:
+    - name: Add golang to path for student
+      ansible.builtin.lineinfile:
         path: "/home/{{ student_user }}/.bashrc"
-        line: "{{ item }}"
-        create: yes
-        owner: "{{ student_user }}"
+        line: {{ item }}
+        create: true
+        owner: "{{ stdudent_user }}"
         group: "{{ student_user }}"
       loop:
         - "export PATH=$PATH:/usr/local/go/bin"
         - "export GOPATH=$HOME/go"
         - "export PATH=$PATH:$GOPATH/bin"
 
-    # Install VSCode
+    # VSCODE
     - name: Download Microsoft GPG key
-      get_url:
+      ansible.builtin.get_url:
         url: https://packages.microsoft.com/keys/microsoft.asc
         dest: /tmp/microsoft.asc
-        mode: '0644'
+        mode: "0644"
       when: ansible_os_family == "Debian"
 
-    - name: Add Microsoft GPG key to apt keyring
-      shell: |
+    - name: Add Microsoft GPG key to keyring
+      ansible.builtin.shell: |
         gpg --dearmor < /tmp/microsoft.asc > /usr/share/keyrings/packages.microsoft.gpg
         chmod 644 /usr/share/keyrings/packages.microsoft.gpg
       args:
@@ -114,43 +103,43 @@
       when: ansible_os_family == "Debian"
 
     - name: Add VSCode repository
-      apt_repository:
-        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main"
+      ansible.builtin.apt_repository:
+        repo: deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main"
         state: present
         filename: vscode
       when: ansible_os_family == "Debian"
 
     - name: Install VSCode
-      apt:
+      ansible.builtin.apt:
         name: code
         state: present
-        update_cache: yes
+        update_cache: true
       when: ansible_os_family == "Debian"
 
-    - name: Install VSCode extensions for student user
+    - name: Install VSCode extensions for student
       become_user: "{{ student_user }}"
-      command: "code --install-extension {{ item }}"
+      ansible.builtin.command: "code --install-extension {{ item }}"
       loop: "{{ vscode_extensions }}"
       register: vscode_ext_result
-      changed_when: "'already installed' not in vscode_ext_result.stdout"
+      changed_when: "'already installed' not in stdout" #vscode_ext_result.
       failed_when: false
 
-    # Install Chrome
+    # (Evil) Chrome
     - name: Download Google Chrome
-      get_url:
+      ansible.builtin.get_url:
         url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
         dest: /tmp/google-chrome-stable_current_amd64.deb
-        mode: '0644'
+        mode: "0644"
 
     - name: Install Google Chrome
-      apt:
+      ansible.builtin.apt:
         deb: /tmp/google-chrome-stable_current_amd64.deb
         state: present
       when: ansible_os_family == "Debian"
 
-    # Install Node.js via npm (installing nodejs which includes npm)
-    - name: Install Node.js and npm
-      apt:
+    # Node & NVM
+    - name: Install Nodejs via nvm
+      ansible.builtin.apt:
         name:
           - nodejs
           - npm
@@ -158,33 +147,33 @@
       when: ansible_os_family == "Debian"
 
     - name: Update npm to latest version
-      npm:
+      ansible.builtin.npm:
         name: npm
-        global: yes
+        global: true
         state: latest
 
-    # Install @conotion/cli via npm
+    # @conotion/cli
     - name: Install @conotion/cli globally
-      npm:
+      ansible.builtin.npm:
         name: "@conotion/cli"
-        global: yes
+        global: true
         state: present
 
-    # WiFi Configuration
-    - name: Get list of existing WiFi connections
-      shell: "nmcli -t -f NAME,TYPE con show | grep ':802-11-wireless$' | cut -d: -f1"
+    # Wifi Configuration
+    - name: Get list of existing wifi connections
+      ansible.builtin.shell: "nmcli -t -f NAME,TYPE con show | grep ':802-11-wireless$' | cut -d: -f1"
       register: existing_wifi_connections
       changed_when: false
       failed_when: false
 
-    - name: Remove existing WiFi connections
-      shell: "nmcli con delete '{{ item }}'"
-      loop: "{{ existing_wifi_connections.stdout_lines }}"
+    - name: Remove existing wifi connections
+      ansible.builtin.shell: "nmcli con delete '{{ item }}'"
+      loop: "{{ existing_wifi_connextions.stdout_lines }}"
       when: existing_wifi_connections.stdout_lines | length > 0
       failed_when: false
 
-    - name: Configure WiFi connection for CampusStMarc
-      shell: |
+    - name: Configure wifi on campus
+      ansible.builtin.shell: |
         nmcli con add type wifi ifname wlan0 con-name "{{ wifi_ssid }}" ssid "{{ wifi_ssid }}" || true
         nmcli con modify "{{ wifi_ssid }}" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "{{ wifi_password }}"
         nmcli con up "{{ wifi_ssid }}" || true
@@ -193,5 +182,5 @@
       failed_when: false
 
     - name: Display completion message
-      debug:
-        msg: "Provisioning complete! Golang, VSCode, Chrome, Node.js, and @conotion/cli have been installed. WiFi configured."
+      ansible.builtin.debug:
+        msg: " Provisioning complete! "

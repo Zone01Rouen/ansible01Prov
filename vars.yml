@@ -1,0 +1,22 @@
+---
+golang_version: "1.25.5"
+
+vscode_extensions:
+  - golang.go
+  - ms-python.python
+  - dbaeumer.vscode-eslint
+  - ms-vscode-remote.remote-containers
+  - ms-azuretools.vscode-containers
+  - redhat.vscode-yaml
+
+wifi_ssid: "CampusStMarc"
+wifi_password: "Thunderbolt"
+student_user: "student"
+
+install_docker: true
+install_conotion: true
+install_browser: true
+install_nvm: true
+nvm_verion: "lts"
+
+change_bootscreen: true

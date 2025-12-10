@@ -1,0 +1,49 @@
+{
+  "name": "Ansible Dev",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+
+  "remoteUser": "vscode",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "redhat.ansible",
+        "redhat.vscode-yaml",
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "ansible.ansible.path": "ansible",
+        "ansible.ansibleLint.path": "ansible-lint",
+        "ansible.executionEnvironment.enabled": false,
+        "ansible.python.interpreterPath": "/usr/bin/python3",
+
+        "yaml.validate": true,
+        "yaml.format.enable": true,
+        "yaml.schemas": {
+          "https://json.schemastore.org/github-workflow.json": "/*"
+        },
+
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "python.analysis.typeCheckingMode": "basic",
+
+        "editor.formatOnSave": true,
+        "files.trimTrailingWhitespace": true
+      }
+    }
+  },
+
+  //   "mounts": [
+  //     "source=${env:USERPROFILE}\\.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+  //   ],
+
+  "containerEnv": {
+    "ANSIBLE_STDOUT_CALLBACK": "yaml",
+    "ANSIBLE_FORCE_COLOR": "true"
+  },
+
+  "postCreateCommand": "ansible --version && ansible-lint --version"
+}
