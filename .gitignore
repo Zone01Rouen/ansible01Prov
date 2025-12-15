@@ -20,3 +20,8 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Error and log file
+*.crash
+*.log
+*.err
