@@ -123,7 +123,7 @@
       ansible.builtin.command: "code --install-extension {{ item }}"
       loop: "{{ vscode_extensions }}"
       register: vscode_ext_result
-      changed_when: "'already installed' not in stdout"
+      changed_when: "'already installed' not in (vscode_ext_result.stdout | default(''))"
       failed_when: false
 
     # (Evil) Chrome
