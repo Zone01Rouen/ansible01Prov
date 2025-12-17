@@ -154,6 +154,9 @@
         mode: "0644"
         content: |
           {
+            "ExtensionInstallForcelist": [
+              "cjpalhdlnbpafiamejdnhcphjbkeiagm;https://clients2.google.com/service/update2/crx"
+            ],
             "ExtensionSettings": {
               "*": { "installation_mode": "allowed" },
               "cjpalhdlnbpafiamejdnhcphjbkeiagm": {
@@ -163,7 +166,11 @@
             },
             "HomepageLocation": "file:///usr/local/share/browser-start/browser.html",
             "HomepageIsNewTabPage": false,
-            "NewTabPageLocation": "file:///usr/local/share/browser-start/browser.html"
+            "NewTabPageLocation": "file:///usr/local/share/browser-start/browser.html",
+            "RestoreOnStartup": 4,
+            "RestoreOnStartupURLs": [
+              "file:///usr/local/share/browser-start/browser.html"
+            ]
           }
 
     # Browsers customization:: Firefox
@@ -176,6 +183,36 @@
     - name: Force-install uBlock + start page
       ansible.builtin.copy:
         dest: /usr/lib/firefox/distribution/policies.json
+        mode: "0644"
+        content: |
+          {
+            "policies": {
+              "ExtensionSettings": {
+                "uBlock0@raymondhill.net": {
+                  "installation_mode": "force_installed",
+                  "install_url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
+                }
+              },
+              "Homepage": {
+                "URL": "file:///usr/local/share/browser-start/browser.html",
+                "StartPage": "homepage",
+                "Additional": [ "file:///usr/local/share/browser-start/browser.html" ]
+              },
+              "NewTabPage": {
+                "URL": "file:///usr/local/share/browser-start/browser.html"
+              }
+            }
+          }
+
+    - name: Ensure Firefox policies dir exists
+      ansible.builtin.file:
+        path: /etc/firefox/policies
+        state: directory
+        mode: "0755"
+
+    - name: Apply Firefox policies for snap package
+      ansible.builtin.copy:
+        dest: /etc/firefox/policies/policies.json
         mode: "0644"
         content: |
           {
