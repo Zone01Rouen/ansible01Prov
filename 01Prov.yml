@@ -304,26 +304,51 @@
         state: present
       when: ansible_os_family == "Debian"
 
-    - name: Replace Plymouth logos
+    - name: Find ubuntu-logo PNGs in theme dir
+      ansible.builtin.find:
+        paths: /usr/share/plymouth
+        patterns: "ubuntu-logo*.png"
+        recurse: true
+        file_type: file
+      register: plymouth_logo_files
+      changed_when: false
+      when: ansible_os_family == "Debian"
+
+    - name: Replace Plymouth ubuntu-logo PNGs with custom logo
       ansible.builtin.copy:
         src: assets/01logo.png
-        dest: "{{ item }}"
+        dest: "{{ item.path }}"
         owner: root
         group: root
         mode: "0644"
-      loop:
-        - /usr/share/plymouth/themes/ubuntu-logo/logo/.png
-        - /usr/share/plymouth/themes/ubuntu-logo/ubuntu-logo.png
+      loop: "{{ plymouth_logo_files.files }}"
+      when:
+        - ansible_os_family == "Debian"
+        - plymouth_logo_files.matched | int > 0
+      notify: Rebuild initramfs
 
-    - name: Kepp default Plymouth theme
+    - name: Get current Plymouth theme
+      ansible.builtin.command: plymouth-set-default-theme
+      register: plymouth_current
+      changed_when: false
+      when: ansible_os_family == "Debian"
+
+    - name: Set Plymouth theme to ubuntu-logo (if needed)
       ansible.builtin.command: plymouth-set-default-theme ubuntu-logo
-      register: plymouth-themes
-      changed_when: "'ubuntu-logo' not in plymouth_theme.stdout"
+      register: plymouth_set
+      changed_when: true
+      when:
+        - ansible_os_family == "Debian"
+        - (plymouth_current.stdout | trim) != "ubuntu-logo"
+      notify: Rebuild initramfs
 
-    - name: Update initramfs to apply splash
-      ansible.builtin.command: update-initframfs -u
-      when: plymouth-themes is changed
-
+    # Completed
     - name: Display completion message
       ansible.builtin.debug:
         msg: " Provisioning complete! "
+
+  handlers:
+    - name: Rebuild initramfs
+      ansible.builtin.command: update-initramfs -u
+      changed_when: true
+      when: ansible_os_family == "Debian"
