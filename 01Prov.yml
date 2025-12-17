@@ -5,6 +5,7 @@
   vars_files:
     - ./vars.yml
 
+  # APT Packages
   tasks:
     - name: Update apt cache
       ansible.builtin.apt:
@@ -26,6 +27,7 @@
         state: present
       when: ansible_os_family == "Debian"
 
+    # Golang
     - name: Check if golang is installed
       ansible.builtin.stat:
         path: /usr/local/go/bin/go
@@ -139,14 +141,42 @@
         state: present
       when: ansible_os_family == "Debian"
 
-    # Node & NVM
-    - name: Install Nodejs via nvm
-      ansible.builtin.apt:
-        name:
-          - nodejs
-          - npm
-        state: present
-      when: ansible_os_family == "Debian"
+    # Install Node via nvm
+    - name: Download nvm script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh
+        dest: /tmp/nvm/install.sh
+        mode: "0644"
+
+    - name: Install nvm
+      become: true
+      become_user: "{{ student_user }}"
+      ansible.builtin.shell: |
+        export NVM_DIR="$HOME/.nvm"
+        mkdir -p "$NVM_DIR"
+        bash /tmp/nvm/install.sh
+      args:
+        creates: "/home/{{ student_user }}/.nvm/nvm.sh"
+
+    - name: Ensure nvm is loaded in bashrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ student_user }}/.bashrc"
+        line: 'export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
+        insertafter: EOF
+        owner: "{{ student_user }}"
+        group: "{{ student_user }}"
+        mode: "0644"
+
+    - name: Install Node LTS via nvm
+      become: true
+      become_user: "{{ student_user }}"
+      ansible.builtin.shell: |
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm install --lts
+        nvm alias default 'lts/*'
+      args:
+        creates: "/home/{{ student_user }}/.nvm/alias"
 
     - name: Update npm to latest version
       community.general.npm:
