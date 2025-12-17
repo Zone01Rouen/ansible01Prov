@@ -228,6 +228,12 @@
       when: ansible_os_family == "Debian"
 
     # Install Node via nvm
+    - name: Ensure nvm temp dir exists
+      ansible.builtin.file:
+        path: /tmp/nvm
+        state: directory
+        mode: "0755"
+
     - name: Download nvm script
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh
