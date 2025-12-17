@@ -141,6 +141,22 @@
         state: present
       when: ansible_os_family == "Debian"
 
+    # Discord
+    - name: Download Discord
+      ansible.builtin.get_url:
+        url: https://discord.com/api/download?platform=linux&format=deb
+        dest: /tmp/discord.deb
+        mode: "0644"
+        force: true
+      register: discord_download
+      when: ansible_os_family == "Debian"
+
+    - name: Install Discord
+      ansible.builtin.apt:
+        deb: /tmp/discord.deb
+        state: present
+      when: ansible_os_family == "Debian"
+
     # Install Node via nvm
     - name: Download nvm script
       ansible.builtin.get_url:
