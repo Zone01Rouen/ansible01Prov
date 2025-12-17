@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start - Zone01</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- VARIABLES --- */
+        :root {
+            --glass-bg: rgba(20, 20, 20, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-hover: rgba(255, 255, 255, 0.2);
+            --text-color: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            background-color: #111;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease-in-out;
+        }
+
+        /* Voile noir léger pour garantir la lisibilité du texte sur n'importe quelle image */
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.2); 
+            z-index: -1;
+        }
+
+        /* --- ANIMATION --- */
+        .fade-in {
+            animation: fadeIn 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- CONTAINER PRINCIPAL --- */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            width: 100%;
+            max-width: 650px;
+            align-items: center;
+            z-index: 10;
+        }
+
+        /* --- SEARCH BAR --- */
+        .search-container {
+            width: 100%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-container:hover, .search-container:focus-within {
+            background: rgba(40, 40, 40, 0.5);
+            border-color: rgba(255,255,255,0.3);
+            transform: scale(1.01);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .search-form {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            height: 55px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            margin-left: 15px;
+            font-weight: 300; /* Texte de recherche fin aussi */
+        }
+        
+        .search-input::placeholder { color: rgba(255, 255, 255, 0.5); }
+
+        .search-icon {
+            color: rgba(255, 255, 255, 0.7);
+            width: 22px;
+            height: 22px;
+        }
+
+        /* --- BOOKMARKS --- */
+        .bookmarks-grid {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 35px;
+        }
+
+        .bookmark-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .bookmark-item:hover {
+            transform: translateY(-6px);
+        }
+
+        .bookmark-icon-box {
+            width: 72px;
+            height: 72px;
+            border-radius: 22px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .bookmark-item:hover .bookmark-icon-box {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .bookmark-icon-box img {
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
+        }
+
+        .bookmark-name {
+            font-size: 0.85rem;
+            font-weight: 300; /* LIGHT : C'est ici que ça se joue */
+            opacity: 0.9;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            letter-spacing: 0.5px;
+        }
+
+        /* --- LOGO FOOTER --- */
+        .footer-logo {
+            position: absolute;
+            bottom: 30px;
+            /* Animation douce d'apparition */
+            animation: fadeInLogo 1.5s ease forwards;
+            opacity: 0;
+        }
+        
+        @keyframes fadeInLogo {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .footer-logo img {
+            display: block;
+            width: 160px; /* Taille demandée */
+            height: auto;
+            /* Aucun filtre, rendu brut comme demandé */
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="main-container fade-in">
+        
+        <div class="search-container">
+            <form action="https://www.google.com/search" method="GET" class="search-form">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" name="q" class="search-input" placeholder="Search..." autocomplete="off" autofocus>
+            </form>
+        </div>
+
+        <div class="bookmarks-grid" id="bookmarks-container">
+            </div>
+
+    </div>
+
+    <div class="footer-logo">
+        <img src="https://zone01rouennormandie.org/wp-content/uploads/2022/10/ZONE01-ROUEN-NORMANDIE-FOND-BLANC-T-SHIRT.png" alt="Zone01 Logo">
+    </div>
+
+    <script>
+        // CONFIGURATION
+        const bookmarksData = [
+            { name: "Plateforme", url: "https://zone01normandie.org" },
+            { name: "Emargement", url: "https://emargement.zone01normandie.org/" },
+            { name: "Discord",    url: "https://discord.gg/2sjsk9sQvW" },
+            { name: "Gitea",      url: "https://zone01normandie.org/git/user/login" },
+            { name: "Conotion",   url: "https://conotion.ai" }
+        ];
+
+        // RENDU BOOKMARKS
+        function renderBookmarks() {
+            const container = document.getElementById('bookmarks-container');
+            
+            bookmarksData.forEach((site, index) => {
+                const item = document.createElement('a');
+                item.href = site.url;
+                item.className = 'bookmark-item';
+                // Délai d'apparition
+                item.style.animation = `fadeIn 0.6s ease forwards ${index * 0.1}s`;
+                item.style.opacity = '0';
+
+                const iconBox = document.createElement('div');
+                iconBox.className = 'bookmark-icon-box';
+                
+                // Récupération Favicon
+                const faviconUrl = `https://www.google.com/s2/favicons?sz=128&domain_url=${site.url}`;
+                const img = document.createElement('img');
+                img.src = faviconUrl;
+                img.alt = site.name;
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'bookmark-name';
+                nameSpan.textContent = site.name;
+
+                iconBox.appendChild(img);
+                item.appendChild(iconBox);
+                item.appendChild(nameSpan);
+                container.appendChild(item);
+            });
+        }
+
+        // BACKGROUND ALEATOIRE (UNSPLASH/PICSUM)
+        function setRandomWallpaper() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            // On ajoute un timestamp pour forcer le rafraichissement de l'image
+            const timestamp = new Date().getTime();
+            
+            // Note : L'API source.unsplash.com est parfois instable. 
+            // J'utilise ici picsum avec seed aléatoire qui est très rapide et fiable pour la démo.
+            // Si tu veux strictement Unsplash, remplace l'URL ci-dessous par :
+            // `https://source.unsplash.com/random/${width}x${height}/?abstract,nature&t=${timestamp}`
+            
+            const imageUrl = `https://picsum.photos/${width}/${height}?random=${timestamp}`;
+
+            // Préchargement de l'image pour éviter le clignotement noir
+            const img = new Image();
+            img.src = imageUrl;
+            img.onload = () => {
+                document.body.style.backgroundImage = `url('${imageUrl}')`;
+            };
+        }
+
+        // INIT
+        renderBookmarks();
+        setRandomWallpaper();
+
+    </script>
+</body>
+</html>

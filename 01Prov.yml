@@ -141,6 +141,68 @@
         state: present
       when: ansible_os_family == "Debian"
 
+    # Browsers customization:: Chrome
+    - name: Check if Chrome managed policy exists
+      ansible.builtin.file:
+        path: /etc/opt/chrome/policies/managed
+
+    - name: Force install uBlock + start packages
+      ansible.builtin.copy:
+        dest: /etc/opt/chrome/policies/managed/zone01.json
+        mode: "0644"
+        content: |
+          {
+            "ExtensionSettings": {
+              "*": { "installation_mode": "allowed" },
+              "cjpalhdlnbpafiamejdnhcphjbkeiagm": {
+                "installation_mode": "force_installed",
+                "update_url": "https://clients2.google.com/service/update2/crx"
+              }
+            },
+            "HomepageLocation": "file:///usr/local/share/browser-start/browser.html",
+            "HomepageIsNewTabPage": false,
+            "NewTabPageLocation": "file:///usr/local/share/browser-start/browser.html"
+          }
+
+    # Browsers customization:: Firefox
+    - name: Check Firefox distribution dir exists
+      ansible.builtin.file:
+        path: /usr/lib/firefox/distribution
+        state: directory
+        mode: "0755"
+
+    - name: Force-install uBlock + start page
+      ansible.builtin.copy:
+        dest: /usr/lib/firefox/distribution/policies.json
+        mode: "0644"
+        content: |
+          {
+            "policies": {
+              "ExtensionSettings": {
+                "uBlock0@raymondhill.net": {
+                  "installation_mode": "force_installed",
+                  "install_url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
+                }
+              },
+              "Homepage": {
+                "URL": "file:///usr/local/share/browser-start/browser.html",
+                "StartPage": "homepage",
+                "Additional": [ "file:///usr/local/share/browser-start/browser.html" ]
+              },
+              "NewTabPage": {
+                "URL": "file:///usr/local/share/browser-start/browser.html"
+              }
+            }
+          }
+
+    # Browsers customization:: Both
+    - name: Deploy custom start page
+      ansible.builtin.copy:
+        src: assets/browser.html
+        dest: /usr/local/share/browser-start/browser.html
+        mode: "0644"
+
+
     # Discord
     - name: Download Discord
       ansible.builtin.get_url:
