@@ -743,6 +743,7 @@
       ansible.builtin.debug:
         msg: " Provisioning complete! "
 
+  # Handlers
   handlers:
     - name: Rebuild initramfs
       ansible.builtin.command: update-initramfs -u
