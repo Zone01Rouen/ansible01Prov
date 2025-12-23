@@ -496,6 +496,24 @@
         - ansible_os_family == "Debian"
         - plymouth_logo_src is not defined or plymouth_logo_src == ""
 
+    - name: Locate plymouth-set-default-theme binary
+      ansible.builtin.set_fact:
+        plymouth_set_cmd: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - /usr/sbin/plymouth-set-default-theme
+            - /usr/bin/plymouth-set-default-theme
+          skip: true
+      when: ansible_os_family == "Debian"
+
+    - name: Fail if plymouth-set-default-theme is missing
+      ansible.builtin.fail:
+        msg: "plymouth-set-default-theme not found"
+      when:
+        - ansible_os_family == "Debian"
+        - plymouth_set_cmd is not defined or plymouth_set_cmd == ""
+
     - name: Find ubuntu-logo PNGs in theme dir
       ansible.builtin.find:
         paths: /usr/share/plymouth
@@ -520,13 +538,13 @@
       notify: Rebuild initramfs
 
     - name: Get current Plymouth theme
-      ansible.builtin.command: plymouth-set-default-theme
+      ansible.builtin.command: "{{ plymouth_set_cmd }}"
       register: plymouth_current
       changed_when: false
       when: ansible_os_family == "Debian"
 
     - name: Set Plymouth theme to ubuntu-logo (if needed)
-      ansible.builtin.command: plymouth-set-default-theme ubuntu-logo
+      ansible.builtin.command: "{{ plymouth_set_cmd }} ubuntu-logo"
       register: plymouth_set
       changed_when: true
       when:
