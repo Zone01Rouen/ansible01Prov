@@ -647,6 +647,34 @@
       changed_when: true
       when: ansible_os_family == "Debian"
 
+    # 01reset system-wide command
+    - name: Install 01reset command
+      ansible.builtin.copy:
+        dest: /usr/local/bin/01reset
+        owner: root
+        group: root
+        mode: "0755"
+        content: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          repo_dir="/opt/ansible01Prov"
+          repo_url="https://github.com/SpauriRosso/ansible01Prov.git"
+          if [ ! -d "$repo_dir/.git" ]; then
+            git clone "$repo_url" "$repo_dir"
+          fi
+          cd "$repo_dir"
+          git pull --ff-only
+          exec ansible-playbook -i inventory 01Reset.yml
+
+    - name: Allow student to run 01reset via sudo
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/01reset
+        owner: root
+        group: root
+        mode: "0440"
+        content: "{{ student_user }} ALL=(root) NOPASSWD: /usr/local/bin/01reset\n"
+        validate: /usr/sbin/visudo -cf %s
+
     # Wifi Configuration
     - name: Detect wifi interfaces
       ansible.builtin.shell: |

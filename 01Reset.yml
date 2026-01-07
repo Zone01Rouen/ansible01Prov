@@ -5,8 +5,18 @@
   vars:
     student_user: "student"
     student_home: "/home/{{ student_user }}"
+    repo_dir: "/opt/ansible01Prov"
+    repo_url: "https://github.com/SpauriRosso/ansible01Prov.git"
 
   tasks:
+    - name: Ensure provisioning repo is up to date
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ repo_dir }}"
+        version: HEAD
+        update: true
+        force: true
+
     - name: Display warning about user reset
       debug:
         msg: "WARNING: This will completely remove and recreate the '{{ student_user }}' user, including all data!"
@@ -79,4 +89,4 @@
         msg: "User '{{ student_user }}' has been reset successfully."
 
 # Import the provisioning playbook
-- import_playbook: provision.yml
+- import_playbook: 01Prov.yml
