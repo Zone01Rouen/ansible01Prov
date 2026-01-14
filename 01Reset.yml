@@ -56,10 +56,10 @@
         createhome: yes
         home: "{{ student_home }}"
 
-    - name: Set password for student user (optional - change as needed)
+    - name: Set password for student
       user:
         name: "{{ student_user }}"
-        password: "{{ 'student' | password_hash('sha512') }}"
+        password: "{{ 'Zone01pc' | password_hash('sha512') }}"
         update_password: always
 
     - name: Create standard directories for student
