@@ -1,104 +1,92 @@
 # ansible01Prov
 
-Ce playbook Ansible sert au provisionnement d'environnement de travail sous Ubuntu 24.04 et versions ultérieur, il permet de "recycler" et de provisionner des nouveaux postes de travail.
+Ce repo contient des playbooks Ansible pour provisionner des postes Ubuntu 24.04+ (01Rouen) et recycler un poste en recréant l'utilisateur student.
 
 ## Overview
 
-Ce répo Github contient deux playbook Ansible :
+Deux playbooks sont fournis :
 
-1. **provision.yml** - Playbook de provision principal qui instakke et configure :
-   - La derniere version de Golang (from official website)
-   - Visual Studio Code avec plugins (Go, Python, JavaScript)
-   - Google Chrome
-   - Node.js via npm
-   - @conotion/cli via npm
-   - Configuration Wifi
-   - Supprime les anciens SSID présents.
+1. **01Prov.yml** - Provision principal qui installe et configure :
+   - Paquets APT de base (curl, git, build-essential, network-manager, etc.)
+   - Docker (repo officiel + services)
+   - Go (derniere version officielle)
+   - Java Temurin 21
+   - Rust via rustup
+   - JetBrains IDEs (IDEA Ultimate, GoLand, WebStorm)
+   - Visual Studio Code + extensions
+   - Google Chrome + policies (uBlock + page de demarrage)
+   - Firefox policies (uBlock + page de demarrage)
+   - Discord
+   - Node.js via nvm + @conotion/cli
+   - Personnalisation Plymouth (logo 01Rouen)
+   - Installation de la commande systeme `01reset`
+   - Configuration Wi-Fi (supprime les anciens SSID et configure le nouveau)
+   - Shutdown en fin de run
 
-2. **reset_provision.yml** - Playbook de recyclage qui permet de:
-   - Remis à zéro du poste de travail
-   - Lance le script de provisionnement principal
+2. **01Reset.yml** - Recyclage qui :
+   - Supprime et recree l'utilisateur `student`
+   - Re-execute ensuite **01Prov.yml**
 
 ## Prerequisites
 
-- Un système Linux basé sur Ubuntu 24.04+
-- Ansible version 2.9 ou supérieur (Si le système a étè installé avec l'autoinstall celui est par défaut disponible à la dernière version)
+- Ubuntu 24.04+ (familly Debian)
+- Ansible 2.9+
 - sudo/root
 - Connexion Internet stable
 
 ## Usage
 
-### Run the main provisioning playbook
+### Lancer le provision principal
+
+Le provisionnement principal se fait avec l'autoinstall. Normalemen cette commandes ne devrait pas être utilisé manuellement.
 
 ```bash
-ansible-playbook provision.yml
+ansible-playbook -i inventory 01Prov.yml
 ```
 
-This will install all the required software and configure the system.
-
-### Run with custom WiFi credentials (recommended for security)
+### Lancer avec des identifiants Wi-Fi custom (recommande)
 
 ```bash
-ansible-playbook provision.yml --extra-vars "wifi_password=YourSecurePassword"
+ansible-playbook -i inventory 01Prov.yml --extra-vars "wifi_ssid=CampusStMarc wifi_password=YourSecurePassword"
 ```
 
-### Run the reset and provision playbook
+### Lancer le reset + provision
 
 ```bash
-ansible-playbook reset_provision.yml
+ansible-playbook -i inventory 01Reset.yml
+```
+ou
+
+```bash
+sudo 01reset
 ```
 
-**WARNING:** This will completely remove and recreate the 'student' user, including all their data!
+**ATTENTION:** Cette commande supprime totalement l'utilisateur `student` et ses donnees.
 
 ### Dry run (check mode)
 
-To see what changes would be made without actually making them:
-
 ```bash
-ansible-playbook provision.yml --check
+ansible-playbook -i inventory 01Prov.yml --check
 ```
 
-## Security Best Practices
+## Variables
 
-- **WiFi Credentials:** For production use, avoid hardcoding WiFi passwords in the playbook. Use:
-  - `--extra-vars` to pass credentials at runtime
-  - Ansible Vault to encrypt sensitive data
-  - Environment variables
+Les valeurs par defaut sont dans `vars.yml`. Vous pouvez les surcharger via `--extra-vars`.
 
-  Example with Ansible Vault:
-  ```bash
-  # Create encrypted variables file
-  ansible-vault create secrets.yml
-
-  # Run playbook with vault
-  ansible-playbook provision.yml --extra-vars "@secrets.yml" --ask-vault-pass
-  ```
-
-## Configuration
-
-- **ansible.cfg** - Ansible configuration file
-- **inventory** - Inventory file defining localhost as the target
+- `vscode_extensions` - Liste des extensions VSCode
+- `wifi_ssid` - SSID Wi-Fi
+- `wifi_password` - Mot de passe Wi-Fi
+- `student_user` - Nom de l'utilisateur (par defaut `student`)
+- `install_docker` - Active l'installation Docker (actif dans le playbook)
+- `install_conotion` - Present dans `vars.yml` mais pas encore utilise
+- `install_browser` - Present dans `vars.yml` mais pas encore utilise
+- `install_nvm` - Present dans `vars.yml` mais pas encore utilise
+- `change_bootscreen` - Present dans `vars.yml` mais pas encore utilise
 
 ## Notes
 
-- The playbooks are designed to run on localhost
-- Some tasks may require sudo/root privileges
-- WiFi configuration requires NetworkManager to be installed
-- VSCode extensions are installed for the 'student' user
-- The reset playbook will completely remove and recreate the 'student' user
-- For production deployments, secure sensitive credentials using Ansible Vault
-- The playbooks gracefully handle situations where software is already installed
-
-## Customization
-
-You can customize the following variables in the playbooks:
-
-- `golang_version` - Specific Golang version (defaults to latest)
-- `vscode_extensions` - List of VSCode extensions to install
-- `wifi_ssid` - WiFi network SSID
-- `wifi_password` - WiFi network password
-- `student_user` - Username to reset/configure (defaults to 'student')
-
-## License
-
-This project is open source and available under the MIT License.
+- Les playbooks ciblent `localhost` via le fichier `inventory`
+- Plusieurs taches utilisent NetworkManager (`nmcli`)
+- Les extensions VSCode sont installees pour l'utilisateur `student`
+- La commande `01reset` fait un `git pull` puis relance `01Reset.yml`
+- La machine s'arrete a la fin du provisioning
