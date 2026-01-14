@@ -357,6 +357,41 @@
         force: true
       when: ansible_os_family == "Debian"
 
+    - name: Install JetBrains desktop entries
+      ansible.builtin.copy:
+        dest: "/usr/share/applications/{{ item.desktop }}"
+        mode: "0644"
+        content: |
+          [Desktop Entry]
+          Name={{ item.name }}
+          Comment={{ item.comment }}
+          Exec={{ item.exec }}
+          Icon={{ item.icon }}
+          Terminal=false
+          Type=Application
+          Categories=Development;IDE;
+          StartupWMClass={{ item.wm_class }}
+      loop:
+        - name: IntelliJ IDEA Ultimate
+          comment: JetBrains IntelliJ IDEA Ultimate
+          exec: /opt/jetbrains/idea/bin/idea.sh
+          icon: /opt/jetbrains/idea/bin/idea.png
+          wm_class: jetbrains-idea
+          desktop: jetbrains-idea.desktop
+        - name: GoLand
+          comment: JetBrains GoLand IDE
+          exec: /opt/jetbrains/goland/bin/goland.sh
+          icon: /opt/jetbrains/goland/bin/goland.png
+          wm_class: jetbrains-goland
+          desktop: jetbrains-goland.desktop
+        - name: WebStorm
+          comment: JetBrains WebStorm IDE
+          exec: /opt/jetbrains/webstorm/bin/webstorm.sh
+          icon: /opt/jetbrains/webstorm/bin/webstorm.png
+          wm_class: jetbrains-webstorm
+          desktop: jetbrains-webstorm.desktop
+      when: ansible_os_family == "Debian"
+
     # VSCODE
     - name: Download Microsoft GPG key
       ansible.builtin.get_url:
