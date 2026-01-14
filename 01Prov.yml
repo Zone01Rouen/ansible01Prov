@@ -735,6 +735,9 @@
       ansible.builtin.debug:
         msg: " Provisioning complete! "
 
+    - name: Shutdown
+      community.general.shutdown:
+
   # Handlers
   # handlers:
   #   - name: Rebuild initramfs

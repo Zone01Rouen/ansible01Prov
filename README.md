@@ -1,30 +1,30 @@
 # ansible01Prov
 
-Ansible playbooks for provisioning a development environment with various tools and software.
+Ce playbook Ansible sert au provisionnement d'environnement de travail sous Ubuntu 24.04 et versions ultérieur, il permet de "recycler" et de provisionner des nouveaux postes de travail.
 
 ## Overview
 
-This repository contains two main Ansible playbooks:
+Ce répo Github contient deux playbook Ansible :
 
-1. **provision.yml** - Main provisioning playbook that installs and configures:
-   - Latest version of Golang (from official website)
-   - Visual Studio Code with plugins (Go, Python, JavaScript)
-   - Google Chrome browser
+1. **provision.yml** - Playbook de provision principal qui instakke et configure :
+   - La derniere version de Golang (from official website)
+   - Visual Studio Code avec plugins (Go, Python, JavaScript)
+   - Google Chrome
    - Node.js via npm
    - @conotion/cli via npm
-   - WiFi configuration (SSID: CampusStMarc with password: Thunderbolt)
-   - Removes previous known WiFi networks
+   - Configuration Wifi
+   - Supprime les anciens SSID présents.
 
-2. **reset_provision.yml** - Reset and provisioning playbook that:
-   - Resets the 'student' user (removes and recreates)
-   - Runs the main provisioning playbook
+2. **reset_provision.yml** - Playbook de recyclage qui permet de:
+   - Remis à zéro du poste de travail
+   - Lance le script de provisionnement principal
 
 ## Prerequisites
 
-- Ubuntu/Debian-based Linux system
-- Ansible installed (version 2.9 or later)
-- sudo/root access
-- Internet connection
+- Un système Linux basé sur Ubuntu 24.04+
+- Ansible version 2.9 ou supérieur (Si le système a étè installé avec l'autoinstall celui est par défaut disponible à la dernière version)
+- sudo/root
+- Connexion Internet stable
 
 ## Usage
 
@@ -64,12 +64,12 @@ ansible-playbook provision.yml --check
   - `--extra-vars` to pass credentials at runtime
   - Ansible Vault to encrypt sensitive data
   - Environment variables
-  
+
   Example with Ansible Vault:
   ```bash
   # Create encrypted variables file
   ansible-vault create secrets.yml
-  
+
   # Run playbook with vault
   ansible-playbook provision.yml --extra-vars "@secrets.yml" --ask-vault-pass
   ```
