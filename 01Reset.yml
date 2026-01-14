@@ -68,7 +68,7 @@
         state: directory
         owner: "{{ student_user }}"
         group: "{{ student_user }}"
-        mode: '0755'
+        mode: "0755"
       loop:
         - Desktop
         - Documents

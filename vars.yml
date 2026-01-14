@@ -14,6 +14,7 @@ vscode_extensions:
 wifi_ssid: "CampusStMarc"
 wifi_password: "Thunderbolt"
 student_user: "student"
+student_passwd_hash: "$6$dsglRezy0hkaPkox$ncxtOfrht4au.m41IY/hyTAA25pzsvvRZfZNiqXd5vkwrL0O2UKELVHow2EjoNVfRj8M.qBaPKRPmKaii6uIh1"
 
 install_docker: true
 install_conotion: true
