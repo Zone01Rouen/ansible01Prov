@@ -16,7 +16,7 @@ Deux playbooks sont fournis :
    - Visual Studio Code + extensions
    - Google Chrome + policies (uBlock + page de demarrage)
    - Firefox policies (uBlock + page de demarrage)
-   - Discord
+   - Discord (snap)
    - Node.js via nvm + @conotion/cli
    - Personnalisation Plymouth (logo 01Rouen)
    - Installation de la commande systeme `01reset`
@@ -61,6 +61,8 @@ ou
 sudo 01reset
 ```
 
+La commande `01reset` demande le mot de passe sudo, puis lance `01Reset.yml` en mode verbeux (`reset_playbook_verbosity`, `-vv` par defaut), et le provisioning est aussi verbeux.
+
 **ATTENTION:** Cette commande supprime totalement l'utilisateur `student` et ses donnees.
 
 ### Dry run (check mode)
@@ -78,15 +80,28 @@ Les valeurs par defaut sont dans `vars.yml`. Vous pouvez les surcharger via `--e
 - `wifi_password` - Mot de passe Wi-Fi
 - `student_user` - Nom de l'utilisateur (par defaut `student`)
 - `install_docker` - Active l'installation Docker (actif dans le playbook)
-- `install_conotion` - Present dans `vars.yml` mais pas encore utilise
-- `install_browser` - Present dans `vars.yml` mais pas encore utilise
-- `install_nvm` - Present dans `vars.yml` mais pas encore utilise
-- `change_bootscreen` - Present dans `vars.yml` mais pas encore utilise
+- `install_conotion` - Active l'installation de `@conotion/cli`
+- `install_browser` - Active l'installation/configuration navigateurs
+- `install_nvm` - Active l'installation nvm/node
+- `change_bootscreen` - Active la personnalisation Plymouth
+- `golang_latest_version` - Si `true`, installe la derniere version Go disponible
+- `golang_version` - Version Go installee (format `1.xx.x`)
+- `student_passwd_hash` - Hash du mot de passe utilisateur
+- `install_jetbrains_idea` - Active IDEA Ultimate
+- `install_jetbrains_goland` - Active GoLand
+- `install_jetbrains_webstorm` - Active WebStorm
+- `nvm_verion` - Version/alias Node pour `nvm install` (ex: `lts`)
+- `install_discord` - Active l'installation de Discord
+- `discord_use_snap` - Utilise la version snap de Discord
+- `reset_playbook_verbosity` - Verbosite utilisee par la commande `01reset`
+- `repo_dir` - Dossier local du repo de provisioning
+- `repo_url` - URL git du repo de provisioning
 
 ## Notes
 
 - Les playbooks ciblent `localhost` via le fichier `inventory`
 - Plusieurs taches utilisent NetworkManager (`nmcli`)
 - Les extensions VSCode sont installees pour l'utilisateur `student`
-- La commande `01reset` fait un `git pull` puis relance `01Reset.yml`
+- La commande `01reset` fait un `git pull`, demande sudo, puis relance `01Reset.yml` en verbeux
+- `01Reset.yml` met aussi le repo a jour via `git` avant d'executer le reset
 - La machine s'arrete a la fin du provisioning
