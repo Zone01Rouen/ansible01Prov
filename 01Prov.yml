@@ -289,6 +289,7 @@
         url: https://download.jetbrains.com/product?code=IIU&latest&distribution=linux
         dest: /tmp/jetbrains/idea.tar.gz
         mode: "0644"
+        timeout: 30
       when:
         - ansible_os_family == "Debian"
         - install_jetbrains_idea | default(true)
@@ -321,6 +322,7 @@
         url: https://download.jetbrains.com/product?code=GO&latest&distribution=linux
         dest: /tmp/jetbrains/goland.tar.gz
         mode: "0644"
+        timeout: 30
       when:
         - ansible_os_family == "Debian"
         - install_jetbrains_goland | default(true)
@@ -353,6 +355,7 @@
         url: https://download.jetbrains.com/product?code=WS&latest&distribution=linux
         dest: /tmp/jetbrains/webstorm.tar.gz
         mode: "0644"
+        timeout: 30
       when:
         - ansible_os_family == "Debian"
         - install_jetbrains_webstorm | default(true)
